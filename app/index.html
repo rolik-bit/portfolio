@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="ru" translate="no" class="notranslate">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="google" content="notranslate">
+<meta name="color-scheme" content="dark only">
+<meta name="theme-color" content="#000000">
+<meta name="description" content="Perihelion — портфолио: WebGL-сайты и интерфейсы, которые хочется потрогать.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Perihelion">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>Perihelion — портфолио</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Prata&family=Manrope:wght@300;400;500;600&family=Unbounded:wght@300;400;500&family=Cormorant:wght@300&display=swap');
+
+:root {
+    --bg: #000;
+    --card: #0c0b10;
+    --card-2: #131219;
+    --line: rgba(255, 255, 255, 0.09);
+    --white: #fff;
+    --muted: rgba(255, 255, 255, 0.56);
+    --dim: rgba(255, 255, 255, 0.36);
+    --accent: #FF6A3D;
+    --accent-rgb: 255, 106, 61;
+    --violet: #6B47FF;
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-reveal: cubic-bezier(0.05, 0.9, 0.1, 1);
+    --safe-t: env(safe-area-inset-top, 0px);
+    --safe-b: env(safe-area-inset-bottom, 0px);
+    --pad: 20px;
+    color-scheme: only dark;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { background: var(--bg); }
+body {
+    background: var(--bg); color: var(--white);
+    font-family: 'Manrope', sans-serif; -webkit-font-smoothing: antialiased;
+    overscroll-behavior-y: none;
+    min-height: 100vh; min-height: 100dvh;
+}
+button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+.press { transition: transform 0.25s var(--ease); }
+.press:active { transform: scale(0.97); }
+
+/* ================= Top bar ================= */
+.topbar {
+    position: sticky; top: 0; z-index: 30;
+    padding: calc(var(--safe-t) + 12px) var(--pad) 12px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid transparent; transition: border-color 0.3s;
+}
+.topbar.scrolled { border-color: var(--line); }
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-mark {
+    width: 26px; height: 26px; border-radius: 50%; position: relative;
+    background: radial-gradient(circle at 35% 30%, #ffd2c2, var(--accent) 45%, #4a1608 100%);
+    box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.55);
+}
+.brand-mark::after { content: ''; position: absolute; inset: -6px -9px; border: 1px solid rgba(255,255,255,0.4); border-radius: 50%; transform: rotate(-18deg) scaleY(0.38); }
+.brand-name { font-family: 'Unbounded', sans-serif; font-size: 15px; letter-spacing: -0.02em; line-height: 1.1; }
+.brand-name small { display: block; font-family: 'Manrope', sans-serif; font-size: 11px; color: var(--muted); letter-spacing: 0.02em; }
+.install-btn {
+    display: none; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 600; padding: 9px 14px; border-radius: 999px;
+    background: var(--white); color: #000;
+}
+.install-btn.show { display: inline-flex; }
+.install-btn svg { width: 15px; height: 15px; }
+
+/* ================= Screens ================= */
+.screens { max-width: 1120px; margin: 0 auto; padding: 0 var(--pad) calc(var(--safe-b) + 120px); }
+.screen { display: none; animation: screen-in 0.6s var(--ease) both; }
+.screen.active { display: block; }
+@keyframes screen-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+.eyebrow { font-family: 'Unbounded', sans-serif; font-weight: 300; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); display: flex; gap: 8px; align-items: center; }
+.eyebrow b { color: var(--accent); font-weight: 400; }
+.h1 { font-family: 'Prata', serif; font-weight: 400; font-size: clamp(30px, 8vw, 54px); line-height: 1.08; letter-spacing: -0.015em; }
+.h1 em, .h2 em { font-style: italic; color: var(--accent); }
+.h2 { font-family: 'Prata', serif; font-weight: 400; font-size: clamp(24px, 5.6vw, 36px); line-height: 1.12; margin: 8px 0 18px; }
+.muted { color: var(--muted); }
+.section { margin-top: 36px; }
+
+/* ================= Hero card (live planet) ================= */
+.hero-card {
+    position: relative; margin-top: 14px; border-radius: 28px; overflow: hidden;
+    min-height: 430px; height: 62vh; max-height: 560px;
+    border: 1px solid var(--line);
+    background: radial-gradient(90% 60% at 50% 120%, rgba(var(--accent-rgb), 0.35), rgba(80, 40, 160, 0.15) 45%, #000 75%);
+    display: flex; flex-direction: column; justify-content: space-between;
+    padding: 24px;
+}
+.hero-card canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; opacity: 0; transition: opacity 1.4s ease; }
+.hero-card canvas.ready { opacity: 1; }
+.hero-card > *:not(canvas) { position: relative; z-index: 1; }
+.hero-card .h1 { margin-top: 14px; text-shadow: 0 6px 30px rgba(0,0,0,0.6); }
+.status { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; padding: 7px 12px 7px 10px; border-radius: 999px; background: rgba(0,0,0,0.5); border: 1px solid var(--line); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.status::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #3CFF8F; box-shadow: 0 0 8px #3CFF8F; }
+.hero-stats { display: flex; gap: 8px; }
+.hero-stat { flex: 1 1 0; min-width: 0; max-width: 170px; padding: 12px 14px; border-radius: 18px; background: rgba(0,0,0,0.5); border: 1px solid var(--line); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.hero-stat b { display: block; font-family: 'Unbounded', sans-serif; font-weight: 300; font-size: clamp(17px, 5vw, 24px); letter-spacing: -0.03em; white-space: nowrap; }
+.hero-stat span { font-size: 11.5px; color: var(--muted); }
+
+/* reveal of the hero title */
+.split .w { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: 0.14em; margin-bottom: -0.14em; }
+.split .w > span { display: inline-block; transform: translateY(105%); filter: blur(14px); opacity: 0; animation: word-in 1.2s var(--ease-reveal) forwards; }
+@keyframes word-in { 30% { opacity: 1; } to { transform: none; filter: blur(0); opacity: 1; } }
+
+/* ================= Filters ================= */
+.filters { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 calc(var(--pad) * -1); padding: 0 var(--pad) 4px; }
+.filters::-webkit-scrollbar { display: none; }
+.chip {
+    flex: none; font-size: 13px; padding: 9px 15px; border-radius: 999px;
+    border: 1px solid var(--line); color: var(--muted); transition: all 0.3s var(--ease);
+}
+.chip.on { background: var(--white); color: #000; border-color: var(--white); }
+
+/* ================= Case cards ================= */
+.cases { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 18px; }
+@media (min-width: 720px) { .cases { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 1040px) { .cases { grid-template-columns: 1fr 1fr 1fr; } }
+.case {
+    display: block; width: 100%; text-align: left;
+    border-radius: 24px; overflow: hidden; background: var(--card); border: 1px solid var(--line);
+    opacity: 0; transform: translateY(24px); animation: card-in 0.8s var(--ease) forwards;
+}
+@keyframes card-in { to { opacity: 1; transform: none; } }
+.case[hidden] { display: none; }
+.case-art { position: relative; aspect-ratio: 16 / 11; overflow: hidden; }
+.case-art .art { position: absolute; inset: 0; transition: transform 1s var(--ease); }
+.case:hover .case-art .art { transform: scale(1.04); }
+.case-badge {
+    position: absolute; top: 12px; left: 12px; z-index: 2; font-size: 11px; padding: 6px 10px; border-radius: 999px;
+    background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    display: inline-flex; align-items: center; gap: 6px;
+}
+.case-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #3CFF8F; box-shadow: 0 0 6px #3CFF8F; }
+.case-body { padding: 16px 18px 18px; }
+.case-top { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.case-title { font-family: 'Unbounded', sans-serif; font-size: 17px; letter-spacing: -0.01em; }
+.case-year { font-size: 12px; color: var(--dim); }
+.case-desc { font-size: 14px; color: var(--muted); line-height: 1.5; margin-top: 6px; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.tag { font-size: 11.5px; padding: 5px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+
+/* card arts (drawn in CSS) */
+.art-bronze { background: radial-gradient(60% 70% at 62% 45%, rgba(255,190,120,0.55), transparent 60%), radial-gradient(40% 50% at 30% 80%, rgba(120,60,20,0.6), transparent 70%), linear-gradient(160deg, #2a1608, #0b0603 70%); }
+.art-bronze .orb { position: absolute; right: 12%; top: 12%; width: 40%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffe1b8 0%, #c98a4a 25%, #6b3a17 55%, #1c0d05 80%); box-shadow: 0 30px 80px rgba(0,0,0,0.6), inset -20px -30px 60px rgba(0,0,0,0.55); }
+.art-bronze .t { position: absolute; left: 7%; bottom: 9%; font-family: 'Cormorant', serif; font-weight: 300; font-size: clamp(30px, 9vw, 46px); line-height: 0.92; color: #f6e3cf; }
+.art-bronze .grid { position: absolute; inset: 0; background: repeating-linear-gradient(90deg, rgba(255,255,255,0.06) 0 1px, transparent 1px 25%); }
+
+.art-planet { background: radial-gradient(120% 90% at 50% 140%, #1a0b18 40%, transparent 41%), radial-gradient(130% 100% at 50% 140%, rgba(255,106,61,0.9) 40%, rgba(107,71,255,0.55) 44%, transparent 55%), #000; }
+.art-planet .stars { position: absolute; inset: 0; background-image: radial-gradient(1px 1px at 20% 30%, #fff, transparent), radial-gradient(1px 1px at 70% 20%, #fff, transparent), radial-gradient(1px 1px at 45% 55%, #fff, transparent), radial-gradient(1px 1px at 85% 45%, #fff, transparent), radial-gradient(1px 1px at 10% 60%, #fff, transparent); opacity: 0.6; }
+.art-planet .t { position: absolute; left: 0; right: 0; bottom: 7%; text-align: center; font-family: 'Unbounded', sans-serif; font-size: clamp(26px, 8.5vw, 40px); letter-spacing: -0.04em; }
+.art-planet .sat { position: absolute; left: 66%; top: 34%; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+
+.art-app { background: radial-gradient(70% 80% at 30% 20%, #2b1c5c, #0a0718 70%); }
+.art-app .phone { position: absolute; left: 50%; top: 12%; width: 34%; aspect-ratio: 9 / 18; transform: translateX(-50%) rotate(-8deg); border-radius: 22px; border: 2px solid rgba(255,255,255,0.35); background: #000; box-shadow: 0 30px 60px rgba(0,0,0,0.6); overflow: hidden; }
+.art-app .phone::before { content: ''; position: absolute; left: 10%; right: 10%; top: 10%; height: 38%; border-radius: 12px; background: radial-gradient(120% 90% at 50% 140%, rgba(255,106,61,0.95) 40%, rgba(107,71,255,0.6) 46%, #000 60%); }
+.art-app .phone::after { content: ''; position: absolute; left: 10%; right: 10%; top: 54%; height: 30%; border-radius: 10px; background: repeating-linear-gradient(#1a1824 0 22%, transparent 22% 33%); }
+.art-app .phone.p2 { left: 70%; top: 22%; transform: translateX(-50%) rotate(10deg); width: 26%; opacity: 0.7; }
+
+/* ================= Process & contact screens ================= */
+.steps { display: grid; gap: 10px; }
+@media (min-width: 720px) { .steps { grid-template-columns: 1fr 1fr; } }
+.step { padding: 18px; border-radius: 22px; background: var(--card); border: 1px solid var(--line); }
+.step-n { font-family: 'Unbounded', sans-serif; font-weight: 300; font-size: 12px; color: var(--accent); }
+.step h3 { font-family: 'Prata', serif; font-weight: 400; font-size: 21px; margin: 14px 0 6px; }
+.step p { font-size: 14px; color: var(--muted); line-height: 1.55; }
+.stack { display: flex; flex-wrap: wrap; gap: 8px; }
+.stack .tag { font-size: 13px; padding: 9px 14px; color: var(--white); }
+
+.contact-card { padding: 22px; border-radius: 26px; background: linear-gradient(160deg, #1b0f0a, #0c0b10 60%); border: 1px solid var(--line); }
+.contact-list { display: grid; gap: 8px; margin-top: 16px; }
+.contact-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 16px 18px; border-radius: 18px; background: var(--card-2); border: 1px solid var(--line);
+}
+.contact-row span { color: var(--muted); font-size: 13px; }
+.contact-row b { font-weight: 500; font-size: 15px; }
+.contact-row svg { width: 18px; height: 18px; color: var(--accent); flex: none; }
+
+/* ================= Buttons ================= */
+.btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 15px 22px; border-radius: 999px; font-size: 15px; font-weight: 500;
+    background: var(--white); color: #000; transition: transform 0.25s var(--ease), background 0.3s;
+}
+.btn:active { transform: scale(0.97); }
+.btn.dark { background: #000; color: var(--white); border: 1px solid rgba(255,255,255,0.18); }
+.btn.block { width: 100%; }
+.btn svg { width: 17px; height: 17px; }
+.orbit-dot { width: 9px; height: 9px; position: relative; display: inline-block; flex: none; }
+.orbit-dot::before { content: ''; position: absolute; inset: 0; background: var(--accent); border-radius: 50%; animation: pulse 2.4s infinite ease-in-out; }
+.orbit-dot::after { content: ''; position: absolute; top: 50%; left: 50%; width: 3px; height: 3px; margin: -1.5px 0 0 -1.5px; border-radius: 50%; background: var(--accent); animation: orbit 1.8s linear infinite; }
+@keyframes pulse { 0%,100% { opacity: .6; transform: scale(.8); } 50% { opacity: 1; transform: scale(1); box-shadow: 0 0 12px rgba(var(--accent-rgb), .9); } }
+@keyframes orbit { from { transform: rotate(0) translateX(10px); } to { transform: rotate(360deg) translateX(10px); } }
+
+/* ================= Tab bar ================= */
+.tabbar {
+    position: fixed; z-index: 40; left: 50%; bottom: calc(var(--safe-b) + 14px); transform: translateX(-50%);
+    display: flex; gap: 4px; padding: 6px; border-radius: 999px;
+    background: rgba(20, 19, 26, 0.72); border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(18px) saturate(1.4); -webkit-backdrop-filter: blur(18px) saturate(1.4);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+}
+.tab {
+    display: flex; align-items: center; gap: 8px; padding: 11px 16px; border-radius: 999px;
+    font-size: 13.5px; font-weight: 500; color: var(--muted); transition: all 0.4s var(--ease);
+}
+.tab svg { width: 19px; height: 19px; flex: none; }
+.tab span { max-width: 0; overflow: hidden; white-space: nowrap; transition: max-width 0.45s var(--ease); }
+.tab.on { background: var(--white); color: #000; }
+.tab.on span { max-width: 110px; }
+
+/* ================= Case sheet ================= */
+.layer { position: fixed; inset: 0; z-index: 60; visibility: hidden; }
+.layer.open { visibility: visible; }
+.scrim { position: absolute; inset: 0; background: rgba(0,0,0,0.6); opacity: 0; transition: opacity 0.4s ease; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+.layer.open .scrim { opacity: 1; }
+.sheet {
+    position: absolute; left: 0; right: 0; bottom: 0; max-height: 94dvh; max-height: 94vh;
+    margin: 0 auto; max-width: 720px;
+    background: #08070b; border: 1px solid var(--line); border-bottom: none;
+    border-radius: 28px 28px 0 0; overflow: hidden; display: flex; flex-direction: column;
+    transform: translateY(100%); transition: transform 0.55s var(--ease);
+}
+.layer.open .sheet { transform: translateY(0); }
+.sheet.dragging { transition: none; }
+.sheet-handle { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 40px; height: 5px; border-radius: 5px; background: rgba(255,255,255,0.35); z-index: 3; }
+.sheet-close { position: absolute; top: 14px; right: 14px; z-index: 3; width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.15); display: grid; place-items: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.sheet-close svg { width: 16px; height: 16px; }
+.sheet-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-bottom: calc(var(--safe-b) + 24px); }
+.sheet-art { position: relative; aspect-ratio: 16 / 10; }
+.sheet-content { padding: 22px var(--pad) 8px; }
+.sheet-title { font-family: 'Prata', serif; font-size: 32px; font-weight: 400; line-height: 1.1; }
+.sheet-sub { color: var(--muted); margin-top: 8px; line-height: 1.55; }
+.meta-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 18px; }
+.meta { padding: 12px; border-radius: 16px; background: var(--card); border: 1px solid var(--line); }
+.meta span { display: block; font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.06em; }
+.meta b { display: block; margin-top: 4px; font-weight: 500; font-size: 14px; }
+.block-title { font-family: 'Unbounded', sans-serif; font-weight: 300; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 26px 0 10px; }
+.brief { padding: 16px; border-radius: 18px; background: var(--card); border: 1px dashed rgba(255,255,255,0.18); font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.8); position: relative; }
+.brief::before { content: 'бриф / промт'; position: absolute; top: -9px; left: 14px; font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; padding: 0 6px; background: #08070b; color: var(--accent); }
+.done { list-style: none; display: grid; gap: 8px; }
+.done li { display: flex; gap: 12px; font-size: 14.5px; line-height: 1.55; color: rgba(255,255,255,0.85); }
+.done li::before { content: ''; flex: none; width: 7px; height: 7px; margin-top: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.8); }
+.sheet-actions { display: grid; gap: 8px; margin-top: 24px; }
+.sheet-actions .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+/* ================= Live viewer ================= */
+.viewer { position: fixed; inset: 0; z-index: 80; background: #000; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.55s var(--ease); visibility: hidden; }
+.viewer.open { transform: none; visibility: visible; }
+.viewer-bar { display: flex; align-items: center; gap: 10px; padding: calc(var(--safe-t) + 10px) 12px 10px; border-bottom: 1px solid var(--line); background: #050507; }
+.icon-btn { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: var(--card-2); border: 1px solid var(--line); flex: none; }
+.icon-btn svg { width: 17px; height: 17px; }
+.viewer-title { flex: 1; min-width: 0; }
+.viewer-title b { display: block; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.viewer-title span { display: block; font-size: 11.5px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.viewer-frame { position: relative; flex: 1; }
+.viewer iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #000; }
+.loader { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; transition: opacity 0.5s; }
+.loader.hide { opacity: 0; }
+.loader i { width: 46px; height: 46px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.12); border-top-color: var(--accent); animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ================= Toast / iOS install hint ================= */
+.toast {
+    position: fixed; left: 50%; bottom: calc(var(--safe-b) + 86px); z-index: 90;
+    transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+    padding: 12px 16px; border-radius: 16px; background: #fff; color: #000; font-size: 13.5px; font-weight: 500;
+    max-width: calc(100vw - 40px); text-align: center; transition: all 0.4s var(--ease);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (min-width: 720px) {
+    :root { --pad: 32px; }
+    .hero-card { padding: 34px; }
+    .sheet { border-radius: 28px; bottom: 24px; border-bottom: 1px solid var(--line); max-height: calc(100vh - 48px); }
+    .layer.open .sheet { transform: none; }
+    .sheet { transform: translateY(calc(100% + 40px)); }
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01s !important; animation-delay: 0s !important; transition-duration: 0.01s !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar" id="topbar">
+    <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div class="brand-name">Perihelion<small>портфолио</small></div>
+    </div>
+    <button class="install-btn press" id="install-btn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+        Установить
+    </button>
+</header>
+
+<main class="screens">
+    <!-- ============ Screen: Cases ============ -->
+    <section class="screen active" id="screen-cases" data-screen="cases">
+        <div class="hero-card">
+            <canvas id="planet"></canvas>
+            <div>
+                <span class="status">Принимаю проекты</span>
+                <h1 class="h1 split" id="hero-title">Сайты, которые <br> хочется *потрогать*</h1>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat"><b id="stat-cases">0</b><span>живых кейса</span></div>
+                <div class="hero-stat"><b>WebGL</b><span>3D и шейдеры</span></div>
+                <div class="hero-stat"><b>100%</b><span>адаптив</span></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="eyebrow"><b>01</b> Кейсы</div>
+            <h2 class="h2">Живые проекты — <em>откройте</em> любой</h2>
+            <div class="filters" id="filters"></div>
+            <div class="cases" id="cases"></div>
+        </div>
+    </section>
+
+    <!-- ============ Screen: Process ============ -->
+    <section class="screen" id="screen-process" data-screen="process">
+        <div class="section" style="margin-top:20px">
+            <div class="eyebrow"><b>02</b> Как я работаю</div>
+            <h2 class="h2">От промта до <em>живого</em> сайта</h2>
+            <p class="muted" style="line-height:1.6;max-width:560px">Каждый кейс здесь начинался с брифа‑промта. Дальше — переосмысление, своя айдентика, мобильная версия и деплой на быстрый хостинг.</p>
+        </div>
+        <div class="section steps">
+            <div class="step"><div class="step-n">01</div><h3>Бриф и промт</h3><p>Разбираю задачу и референс: что должно впечатлить, на каких устройствах, какой бюджет на производительность.</p></div>
+            <div class="step"><div class="step-n">02</div><h3>Своя концепция</h3><p>Не копирую — переосмысляю: бренд, тексты, палитра, шрифты с кириллицей, собственные шейдеры вместо видео.</p></div>
+            <div class="step"><div class="step-n">03</div><h3>Мобильная версия</h3><p>Отдельная вёрстка и кадрирование 3D под вертикальный экран, проверка на реальных телефонах.</p></div>
+            <div class="step"><div class="step-n">04</div><h3>Деплой</h3><p>Cloudflare Pages, код на GitHub, обновления одной командой. Ссылка готова для портфолио.</p></div>
+        </div>
+        <div class="section">
+            <div class="eyebrow"><b>03</b> Стек</div>
+            <div class="stack" style="margin-top:14px">
+                <span class="tag">HTML / CSS / JS</span><span class="tag">WebGL</span><span class="tag">GLSL</span><span class="tag">Three.js</span>
+                <span class="tag">Моушн‑дизайн</span><span class="tag">PWA</span><span class="tag">Адаптив</span><span class="tag">Cloudflare Pages</span>
+                <span class="tag">GitHub</span><span class="tag">AI‑промтинг</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ Screen: Contact ============ -->
+    <section class="screen" id="screen-contact" data-screen="contact">
+        <div class="section" style="margin-top:20px">
+            <div class="eyebrow"><b>04</b> Контакты</div>
+            <h2 class="h2">Есть идея? <br>Давайте <em>обсудим</em></h2>
+        </div>
+        <div class="contact-card">
+            <p class="muted" style="line-height:1.6">Расскажите о задаче в двух словах — отвечу в течение дня и предложу формат: от лендинга до WebGL‑истории.</p>
+            <div class="contact-list" id="contact-list"></div>
+            <a class="btn block" id="contact-main" style="margin-top:16px"><span>Написать</span><span class="orbit-dot" aria-hidden="true"></span></a>
+        </div>
+        <div class="section">
+            <button class="btn dark block press" id="share-btn" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4"/><path d="m15.4 6.5-6.8 4"/></svg>
+                Поделиться портфолио
+            </button>
+        </div>
+    </section>
+</main>
+
+<!-- ============ Tab bar ============ -->
+<nav class="tabbar" id="tabbar">
+    <button class="tab on" data-tab="cases" type="button" aria-label="Кейсы">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>
+        <span>Кейсы</span>
+    </button>
+    <button class="tab" data-tab="process" type="button" aria-label="Процесс">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><ellipse cx="12" cy="12" rx="10" ry="4.2" transform="rotate(-25 12 12)"/></svg>
+        <span>Процесс</span>
+    </button>
+    <button class="tab" data-tab="contact" type="button" aria-label="Контакты">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>
+        <span>Контакты</span>
+    </button>
+</nav>
+
+<!-- ============ Case sheet ============ -->
+<div class="layer" id="sheet-layer" aria-hidden="true">
+    <div class="scrim" data-close></div>
+    <div class="sheet" id="sheet" role="dialog" aria-modal="true">
+        <div class="sheet-handle"></div>
+        <button class="sheet-close" data-close type="button" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        <div class="sheet-scroll" id="sheet-scroll"></div>
+    </div>
+</div>
+
+<!-- ============ Live viewer ============ -->
+<div class="viewer" id="viewer" aria-hidden="true">
+    <div class="viewer-bar">
+        <button class="icon-btn" id="viewer-back" type="button" aria-label="Назад"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <div class="viewer-title"><b id="viewer-name"></b><span id="viewer-url"></span></div>
+        <button class="icon-btn" id="viewer-reload" type="button" aria-label="Перезагрузить"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg></button>
+        <a class="icon-btn" id="viewer-ext" target="_blank" rel="noopener" aria-label="Открыть в браузере"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4 10 14"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg></a>
+    </div>
+    <div class="viewer-frame">
+        <iframe id="viewer-frame" title="Просмотр кейса" allow="fullscreen; accelerometer; gyroscope" loading="lazy"></iframe>
+        <div class="loader" id="viewer-loader"><i></i></div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =====================================================================
+   DATA — add a new case here and it appears everywhere in the app.
+   ===================================================================== */
+const REPO_URL = 'https://github.com/rolik-bit/portfolio';   // fills the "Код" buttons
+
+const CONTACTS = [
+    { label: 'Почта',    value: 'hello@perihelion.studio', href: 'mailto:hello@perihelion.studio', icon: 'mail' },
+    { label: 'Telegram', value: '@perihelion',             href: 'https://t.me/', icon: 'send' },
+];
+
+const CASES = [
+    {
+        id: 'laocoon',
+        title: 'Лаокоон',
+        subtitle: 'Бронза и Время — иммерсивная история о скульптуре',
+        year: '2026',
+        role: 'Дизайн + код',
+        time: '1 день',
+        url: 'https://laocoon-bronze-9oy.pages.dev',
+        repoPath: 'laocoon',
+        art: 'bronze',
+        tags: ['WebGL', 'Three.js', 'GLSL', 'Скролл'],
+        filter: ['webgl', '3d'],
+        brief: 'Воссоздать в одном HTML‑файле сайт «Laocoön — Bronze and Time»: бронзовый конь в 3D, камера летает по орбите от скролла, искры, жидкий металл в шейдере, четыре слайда и кастомный курсор.',
+        done: [
+            '3D‑модель коня на Three.js: кинематографичный свет, туман, ACES‑тонмаппинг и частицы‑искры.',
+            'Фон «жидкий металл» — собственный шейдер, привязанный к камере.',
+            'Перевод на русский и замена шрифтов на кириллические (Cormorant + Manrope).',
+            'Отдельная мобильная вёрстка и кадрирование камеры под вертикальный экран.',
+            'Модель грузится без внешних зависимостей — сайт живёт на Cloudflare Pages.'
+        ],
+        stack: 'Three.js 0.160 · GLTFLoader · ShaderMaterial · Vanilla JS'
+    },
+    {
+        id: 'perihelion',
+        title: 'Perihelion',
+        subtitle: 'Сайт студии интерфейсов с живой планетой',
+        year: '2026',
+        role: 'Концепция + код',
+        time: '1 день',
+        url: 'https://perihelion-6c2.pages.dev',
+        repoPath: 'perihelion',
+        art: 'planet',
+        tags: ['GLSL', 'Моушн', 'Лендинг', 'Адаптив'],
+        filter: ['webgl', 'site'],
+        brief: 'Взять промт футер‑лендинга «Loopstack» (видео с цветком, курсор‑плашка, огромный wordmark) и сделать своё: другой бренд, тексты, цвета и визуал.',
+        done: [
+            'Видео заменено живой планетой на собственном GLSL‑шейдере — ноль ассетов, мгновенная загрузка.',
+            'Из одного экрана вырос полноценный сайт студии: работы, подход, цифры, отзыв, контакты.',
+            'Планета поднимается на первом экране и снова — за финальным «Perihelion».',
+            'Пословные и побуквенные появления, контекстный курсор, счётчики при скролле.',
+            'Полная мобильная версия.'
+        ],
+        stack: 'WebGL 1 · GLSL · Vanilla JS · CSS'
+    },
+    {
+        id: 'app',
+        title: 'Это приложение',
+        subtitle: 'Портфолио в формате PWA — ставится на телефон',
+        year: '2026',
+        role: 'Продукт + код',
+        time: 'вечер',
+        url: '',
+        repoPath: 'app',
+        art: 'app',
+        tags: ['PWA', 'Офлайн', 'Мобайл'],
+        filter: ['app'],
+        brief: 'Собрать все кейсы в одно приложение в стиле Perihelion: устанавливается на телефон, работает без браузерной рамки и офлайн.',
+        done: [
+            'Устанавливается на главный экран (Android, iOS, десктоп) и открывается без браузерной рамки.',
+            'Кейсы открываются прямо внутри — во встроенном просмотрщике.',
+            'Service Worker: оболочка приложения работает офлайн.',
+            'Один массив данных — новый кейс появляется во всех экранах сразу.'
+        ],
+        stack: 'PWA · Service Worker · Web App Manifest · WebGL'
+    }
+];
+
+const FILTERS = [
+    { id: 'all', label: 'Все' },
+    { id: 'webgl', label: 'WebGL' },
+    { id: '3d', label: '3D' },
+    { id: 'site', label: 'Сайты' },
+    { id: 'app', label: 'Приложения' },
+];
+
+/* ===================================================================== */
+const $ = (s, r = document) => r.querySelector(s);
+const ICONS = {
+    mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
+    send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>',
+    play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+    ext:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4 10 14"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>',
+    code: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg>',
+};
+const artHTML = (kind) => ({
+    bronze: '<div class="art art-bronze"><div class="grid"></div><div class="orb"></div><div class="t">Бронза<br>и Время</div></div>',
+    planet: '<div class="art art-planet"><div class="stars"></div><div class="sat"></div><div class="t">Perihelion</div></div>',
+    app:    '<div class="art art-app"><div class="phone"></div><div class="phone p2"></div></div>',
+}[kind] || '');
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function toast(msg) {
+    const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+/* ---------- hero title word reveal ---------- */
+(function splitTitle() {
+    const el = $('#hero-title');
+    const parts = el.innerHTML.split(/(\s+|<br\s*\/?>)/i);
+    el.innerHTML = ''; let i = 0;
+    parts.forEach(p => {
+        if (!p.trim()) { if (p.length) el.append(' '); return; }
+        if (/^<br/i.test(p)) { el.append(document.createElement('br')); return; }
+        const w = document.createElement('span'); w.className = 'w';
+        const s = document.createElement('span');
+        const m = p.match(/^\*(.+)\*$/);
+        s.textContent = m ? m[1] : p; if (m) { s.style.fontStyle = 'italic'; s.style.color = 'var(--accent)'; }
+        s.style.animationDelay = (0.15 + i++ * 0.09) + 's';
+        w.append(s); el.append(w);
+    });
+})();
+
+/* ---------- render cases + filters ---------- */
+function renderCases() {
+    $('#stat-cases').textContent = CASES.filter(c => c.url).length;
+    $('#filters').innerHTML = FILTERS.map((f, i) => `<button class="chip press${i === 0 ? ' on' : ''}" data-filter="${f.id}" type="button">${f.label}</button>`).join('');
+    $('#cases').innerHTML = CASES.map((c, i) => `
+        <button class="case press" data-case="${c.id}" data-filters="${c.filter.join(' ')}" style="animation-delay:${0.1 + i * 0.08}s" type="button">
+            <div class="case-art">${c.url ? '<span class="case-badge">Онлайн</span>' : ''}${artHTML(c.art)}</div>
+            <div class="case-body">
+                <div class="case-top"><div class="case-title">${esc(c.title)}</div><div class="case-year">${c.year}</div></div>
+                <div class="case-desc">${esc(c.subtitle)}</div>
+                <div class="tags">${c.tags.map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>
+            </div>
+        </button>`).join('');
+}
+renderCases();
+
+$('#filters').addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip'); if (!chip) return;
+    document.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c === chip));
+    const f = chip.dataset.filter;
+    document.querySelectorAll('.case').forEach(card => {
+        const show = f === 'all' || card.dataset.filters.split(' ').includes(f);
+        card.hidden = !show;
+        if (show) { card.style.animation = 'none'; card.offsetHeight; card.style.animation = ''; card.style.animationDelay = '0s'; }
+    });
+});
+$('#cases').addEventListener('click', (e) => {
+    const card = e.target.closest('.case'); if (card) openSheet(card.dataset.case);
+});
+
+/* ---------- contacts ---------- */
+$('#contact-list').innerHTML = CONTACTS.map(c => `
+    <a class="contact-row press" href="${c.href}" ${c.href.startsWith('http') ? 'target="_blank" rel="noopener"' : ''}>
+        <div><span>${c.label}</span><br><b>${esc(c.value)}</b></div>${ICONS[c.icon] || ''}
+    </a>`).join('');
+$('#contact-main').href = CONTACTS[0].href;
+
+/* ---------- tabs ---------- */
+function showTab(name, push = true) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === name));
+    document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.dataset.screen === name));
+    window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+    if (push) history.replaceState({ tab: name }, '', name === 'cases' ? location.pathname : '#' + name);
+}
+$('#tabbar').addEventListener('click', (e) => { const t = e.target.closest('.tab'); if (t) showTab(t.dataset.tab); });
+if (['#process', '#contact'].includes(location.hash)) showTab(location.hash.slice(1), false);
+
+addEventListener('scroll', () => $('#topbar').classList.toggle('scrolled', scrollY > 8), { passive: true });
+
+/* ---------- layers (sheet + viewer) with Android back-button support ---------- */
+const stack = [];
+function pushLayer(name) { stack.push(name); history.pushState({ layer: name }, ''); }
+function closeTop(fromPop = false) {
+    const top = stack.pop(); if (!top) return;
+    if (top === 'sheet') closeSheetUI(); else closeViewerUI();
+    if (!fromPop) history.back();
+}
+addEventListener('popstate', () => { if (stack.length) closeTop(true); });
+
+/* ---------- case sheet ---------- */
+let currentCase = null;
+function openSheet(id) {
+    const c = CASES.find(x => x.id === id); if (!c) return;
+    currentCase = c;
+    const repo = REPO_URL ? `${REPO_URL}/tree/main/${c.repoPath}` : '';
+    $('#sheet-scroll').innerHTML = `
+        <div class="sheet-art">${artHTML(c.art)}</div>
+        <div class="sheet-content">
+            <div class="eyebrow"><b>●</b> ${c.year} · ${esc(c.tags.join(' · '))}</div>
+            <h2 class="sheet-title" style="margin-top:10px">${esc(c.title)}</h2>
+            <p class="sheet-sub">${esc(c.subtitle)}</p>
+            <div class="meta-row">
+                <div class="meta"><span>Роль</span><b>${esc(c.role)}</b></div>
+                <div class="meta"><span>Срок</span><b>${esc(c.time)}</b></div>
+                <div class="meta"><span>Год</span><b>${c.year}</b></div>
+            </div>
+            <div class="block-title">Задача</div>
+            <div class="brief">${esc(c.brief)}</div>
+            <div class="block-title">Что сделано</div>
+            <ul class="done">${c.done.map(d => `<li>${esc(d)}</li>`).join('')}</ul>
+            <div class="block-title">Стек</div>
+            <p class="muted" style="font-size:14px">${esc(c.stack)}</p>
+            <div class="sheet-actions">
+                ${c.url ? `<button class="btn block press" data-open-viewer type="button">${ICONS.play} Открыть в приложении</button>` : `<button class="btn block press" data-close type="button">Вы уже внутри ✦</button>`}
+                <div class="row">
+                    ${c.url ? `<a class="btn dark press" href="${c.url}" target="_blank" rel="noopener">${ICONS.ext} Сайт</a>` : ''}
+                    ${repo ? `<a class="btn dark press" href="${repo}" target="_blank" rel="noopener">${ICONS.code} Код</a>` : ''}
+                </div>
+            </div>
+        </div>`;
+    $('#sheet-scroll').scrollTop = 0;
+    $('#sheet-layer').classList.add('open');
+    $('#sheet-layer').setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    pushLayer('sheet');
+}
+function closeSheetUI() {
+    $('#sheet-layer').classList.remove('open');
+    $('#sheet-layer').setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+}
+$('#sheet-layer').addEventListener('click', (e) => {
+    if (e.target.closest('[data-close]')) closeTop();
+    if (e.target.closest('[data-open-viewer]')) openViewer(currentCase);
+});
+
+// swipe the sheet down to close
+(function dragSheet() {
+    const sheet = $('#sheet'), scroller = $('#sheet-scroll');
+    let y0 = null, dy = 0;
+    sheet.addEventListener('touchstart', (e) => {
+        if (scroller.scrollTop > 0 && !e.target.closest('.sheet-handle')) return;
+        y0 = e.touches[0].clientY; dy = 0; sheet.classList.add('dragging');
+    }, { passive: true });
+    sheet.addEventListener('touchmove', (e) => {
+        if (y0 === null) return;
+        dy = Math.max(0, e.touches[0].clientY - y0);
+        sheet.style.transform = `translateY(${dy}px)`;
+    }, { passive: true });
+    sheet.addEventListener('touchend', () => {
+        if (y0 === null) return;
+        sheet.classList.remove('dragging'); sheet.style.transform = '';
+        if (dy > 110) closeTop();
+        y0 = null;
+    });
+})();
+
+/* ---------- live viewer ---------- */
+function openViewer(c) {
+    if (!c || !c.url) return;
+    $('#viewer-name').textContent = c.title;
+    $('#viewer-url').textContent = c.url.replace(/^https?:\/\//, '');
+    $('#viewer-ext').href = c.url;
+    $('#viewer-loader').classList.remove('hide');
+    $('#viewer-frame').src = c.url;
+    $('#viewer').classList.add('open');
+    $('#viewer').setAttribute('aria-hidden', 'false');
+    pushLayer('viewer');
+}
+function closeViewerUI() {
+    $('#viewer').classList.remove('open');
+    $('#viewer').setAttribute('aria-hidden', 'true');
+    setTimeout(() => { if (!$('#viewer').classList.contains('open')) $('#viewer-frame').src = 'about:blank'; }, 600);
+}
+$('#viewer-frame').addEventListener('load', () => $('#viewer-loader').classList.add('hide'));
+$('#viewer-back').addEventListener('click', () => closeTop());
+$('#viewer-reload').addEventListener('click', () => {
+    $('#viewer-loader').classList.remove('hide');
+    const f = $('#viewer-frame'); const src = f.src; f.src = 'about:blank'; setTimeout(() => f.src = src, 50);
+});
+
+/* ---------- share ---------- */
+$('#share-btn').addEventListener('click', async () => {
+    const data = { title: 'Perihelion — портфолио', text: 'WebGL‑сайты и интерфейсы, которые хочется потрогать', url: location.origin + location.pathname };
+    try {
+        if (navigator.share) await navigator.share(data);
+        else { await navigator.clipboard.writeText(data.url); toast('Ссылка скопирована'); }
+    } catch (e) { /* user cancelled */ }
+});
+
+/* ---------- install (PWA) ---------- */
+const isStandalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+let deferredPrompt = null;
+addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; $('#install-btn').classList.add('show'); });
+if (isIOS && !isStandalone) $('#install-btn').classList.add('show');
+$('#install-btn').addEventListener('click', async () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') $('#install-btn').classList.remove('show');
+        deferredPrompt = null;
+    } else if (isIOS) {
+        toast('Нажмите «Поделиться» ⎋ → «На экран Домой»');
+    } else {
+        toast('Откройте меню браузера → «Установить приложение»');
+    }
+});
+addEventListener('appinstalled', () => { $('#install-btn').classList.remove('show'); toast('Приложение установлено ✦'); });
+
+if ('serviceWorker' in navigator) {
+    addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+
+/* ---------- live planet in the hero card (same shader family as Perihelion) ---------- */
+(function planet() {
+    const canvas = $('#planet');
+    const gl = canvas.getContext('webgl', { antialias: false, premultipliedAlpha: false });
+    if (!gl) return;
+    const frag = `
+        precision highp float;
+        uniform vec2 uRes; uniform float uTime; uniform float uRise;
+        const vec3 ACCENT = vec3(1.0, 0.416, 0.239);
+        const vec3 VIOLET = vec3(0.42, 0.28, 1.0);
+        const vec3 DEEP = vec3(0.025, 0.018, 0.045);
+        float hash(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
+        float noise(vec2 p){ vec2 i = floor(p), f = fract(p); vec2 u = f*f*(3.0-2.0*f);
+            return mix(mix(hash(i), hash(i+vec2(1,0)), u.x), mix(hash(i+vec2(0,1)), hash(i+vec2(1,1)), u.x), u.y); }
+        float fbm(vec2 p){ float v = 0.0, a = 0.5; mat2 m = mat2(1.6,1.2,-1.2,1.6);
+            for (int i = 0; i < 4; i++){ v += a*noise(p); p = m*p; a *= 0.5; } return v; }
+        void main(){
+            vec2 frag = gl_FragCoord.xy; float px = 1.0 / uRes.y;
+            vec2 uv = vec2((frag.x - 0.5*uRes.x)/uRes.y, frag.y/uRes.y);
+            float aspect = uRes.x/uRes.y;
+            float R = max(aspect*0.7, 0.7);
+            vec2 c = vec2(0.0, -R + 0.36 - (1.0 - uRise)*0.5);
+            vec2 d = uv - c; float r = length(d);
+            vec3 col = vec3(0.0);
+            float s = hash(floor(frag/2.0));
+            col += step(0.9975, s) * (0.55 + 0.45*sin(uTime*1.7 + s*80.0)) * vec3(0.85, 0.82, 1.0);
+            for (int k = 0; k < 2; k++){
+                float fk = float(k); float Rk = R*(1.12 + 0.13*fk) + 0.02;
+                float line = 1.0 - smoothstep(0.0, 1.6*px, abs(r - Rk));
+                float fade = 1.0 - smoothstep(0.2, 1.15, abs(atan(d.x, d.y)));
+                col += line*fade*0.13*uRise;
+                float a = sin(uTime*(0.13 + 0.05*fk) + fk*2.1)*0.7;
+                float sd = length(uv - (c + Rk*vec2(sin(a), cos(a))));
+                col += ACCENT*(exp(-sd*240.0)*1.6 + exp(-sd*40.0)*0.18)*uRise;
+            }
+            float h = max(r - R, 0.0);
+            vec3 atmo = mix(ACCENT, VIOLET, smoothstep(-0.7, 0.7, d.x/R));
+            col += atmo*(exp(-h*7.0)*0.55 + exp(-h*38.0)*0.9);
+            if (r < R){
+                float e = r/R; float z = sqrt(1.0 - e*e); vec3 n = vec3(d/R, z);
+                float lon = n.x/(n.z + 0.35)*0.9 + uTime*0.02;
+                vec2 q = vec2(lon*1.7, n.y*6.0);
+                vec2 w = vec2(fbm(q + vec2(0.0, uTime*0.03)), fbm(q + vec2(5.2, 1.3) - vec2(uTime*0.025, 0.0)));
+                float f = fbm(q + 2.4*w);
+                vec3 base = mix(DEEP, vec3(0.16, 0.05, 0.05), smoothstep(0.32, 0.78, f));
+                base = mix(base, ACCENT*0.85, smoothstep(0.62, 0.92, f)*0.55);
+                base += VIOLET*0.22*smoothstep(0.45, 0.9, w.x)*(1.0 - smoothstep(0.62, 0.9, f));
+                float diff = clamp(dot(n, normalize(vec3(-0.35, 0.9, 0.45))), 0.0, 1.0);
+                vec3 surf = base*(0.18 + 1.15*diff) + atmo*pow(1.0 - z, 3.0)*1.1;
+                col = mix(col, surf, 1.0 - smoothstep(R - 1.5*px, R, r));
+            }
+            col += (hash(frag + fract(uTime)*100.0) - 0.5)*0.03;
+            gl_FragColor = vec4(max(col, 0.0), 1.0);
+        }`;
+    const sh = (t, s) => { const o = gl.createShader(t); gl.shaderSource(o, s); gl.compileShader(o); return gl.getShaderParameter(o, gl.COMPILE_STATUS) ? o : (console.error(gl.getShaderInfoLog(o)), null); };
+    const vs = sh(gl.VERTEX_SHADER, 'attribute vec2 p; void main(){ gl_Position = vec4(p, 0.0, 1.0); }');
+    const fs = sh(gl.FRAGMENT_SHADER, frag);
+    if (!vs || !fs) return;
+    const pr = gl.createProgram(); gl.attachShader(pr, vs); gl.attachShader(pr, fs); gl.linkProgram(pr); gl.useProgram(pr);
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    const uRes = gl.getUniformLocation(pr, 'uRes'), uTime = gl.getUniformLocation(pr, 'uTime'), uRise = gl.getUniformLocation(pr, 'uRise');
+    const dprMax = matchMedia('(pointer: coarse)').matches ? 1.25 : 1.5;
+    let visible = true;
+    new IntersectionObserver(([e]) => { visible = e.isIntersecting; }).observe(canvas);
+    const t0 = performance.now();
+    canvas.classList.add('ready');
+    (function frame(now) {
+        requestAnimationFrame(frame);
+        const onCases = $('#screen-cases').classList.contains('active');
+        if (!visible || !onCases || document.hidden) return;
+        const dpr = Math.min(devicePixelRatio || 1, dprMax);
+        const w = Math.round(canvas.clientWidth * dpr), h = Math.round(canvas.clientHeight * dpr);
+        if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; gl.viewport(0, 0, w, h); }
+        const t = (now - t0) / 1000;
+        const rise = 1 - Math.pow(1 - Math.min(1, Math.max(0, (t - 0.2) / 2.2)), 3);
+        gl.uniform2f(uRes, w, h); gl.uniform1f(uTime, t); gl.uniform1f(uRise, rise);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+    })(t0);
+})();
+</script>
+</body>
+</html>

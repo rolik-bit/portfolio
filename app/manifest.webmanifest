@@ -1,0 +1,23 @@
+{
+  "name": "Perihelion — портфолио",
+  "short_name": "Perihelion",
+  "description": "WebGL-сайты и интерфейсы, которые хочется потрогать.",
+  "lang": "ru",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "categories": ["design", "portfolio", "productivity"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Кейсы", "url": "./", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Контакты", "url": "./#contact", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

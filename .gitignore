@@ -1,0 +1,7 @@
+# local tooling
+.claude/
+.wrangler/
+wrangler.jsonc
+node_modules/
+.DS_Store
+Thumbs.db
